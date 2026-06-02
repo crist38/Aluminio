@@ -73,6 +73,7 @@ const Cotizacion = (() => {
     cerrarModal();
     document.getElementById('panel-cotizacion').style.display = 'block';
     document.getElementById('cotizacion-count').textContent = items.length;
+    if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
   }
 
   function eliminarItem(id) {
@@ -84,6 +85,7 @@ const Cotizacion = (() => {
     } else {
       document.getElementById('cotizacion-count').textContent = items.length;
     }
+    if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
   }
 
   function renderizarItems() {
@@ -407,6 +409,7 @@ const Cotizacion = (() => {
     renderizarItems();
     document.getElementById('panel-cotizacion').style.display = 'none';
     document.getElementById('cotizacion-count').textContent = '0';
+    if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(0);
     App.toast('Cotización limpiada', '');
   }
 

@@ -268,6 +268,50 @@ const Wizard = (() => {
     }
   }
 
+  // ── Calcula y abre directamente el modal de cotización ──
+  async function calcularYCotizar() {
+    const anchoMm = parseFloat(document.getElementById('inp-ancho').value);
+    const altoMm  = parseFloat(document.getElementById('inp-alto').value);
+    if (!anchoMm || !altoMm || anchoMm < 100 || altoMm < 100) {
+      App.toast('Ingrese medidas válidas (mínimo 100 mm)', 'error');
+      return;
+    }
+    // Reutiliza la lógica de calcular() pero en vez de ir a resultado, abre el modal
+    const obra    = document.getElementById('inp-obra').value.trim();
+    const cant    = parseInt(document.getElementById('inp-cant').value) || 1;
+    const porce   = parseFloat(document.getElementById('inp-porce').value) || 100;
+    const iva     = parseFloat(document.getElementById('inp-iva').value) || 19;
+    const vidi    = document.getElementById('sel-vidrio').value;
+    const coloal  = document.querySelector('input[name="color"]:checked')?.value || 'M';
+    const ancho   = anchoMm / 1000;
+    const alto    = altoMm  / 1000;
+    const colorSufijo = { 'BL': 'M', 'B': 'B', 'M': 'M', 'RO': 'M', 'T': 'M' };
+    const coloalCalc  = colorSufijo[coloal] || 'M';
+    _readOpciones();
+    cfg = {
+      ...cfg, obra, ancho, alto, anchoMm, altoMm, cant, porce, iva, vidi,
+      coloal: coloalCalc, coloalLabel: coloal,
+      hoja:  cfg.hoja  || 2, fija:  cfg.fija  || 0,
+      pal:   cfg.pal   || 'N', pala:  parseFloat(cfg.pala)  || 0,
+      pave:  parseFloat(cfg.pave)  || 0, car:   cfg.car   || 'N',
+      cam:   cfg.cam   || 'N', fondo: parseFloat(cfg.fondo) || 0,
+      bisa:  parseFloat(cfg.bisa)  || 3, jun:   'ALCO5051',
+    };
+    try {
+      preciosData = await Precios.getData();
+      const resultado = Calculos.calcular(cfg, preciosData);
+      window._lastCfg     = { ...cfg };
+      window._lastTotales = { ...resultado.totales };
+      // Capturar canvas de preview como imagen
+      const canvas = document.getElementById('preview-canvas');
+      const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
+      Cotizacion.abrirModal({ cfg: { ...cfg }, totales: { ...resultado.totales }, canvasDataUrl });
+    } catch (e) {
+      App.toast('Error al calcular: ' + e.message, 'error');
+      console.error(e);
+    }
+  }
+
   // Etiquetas de colores
   const COLOR_LABEL = { 'BL': 'Blanco', 'B': 'Bronce', 'M': 'Mate', 'RO': 'Roble', 'T': 'Titanio' };
 
@@ -349,5 +393,17 @@ const Wizard = (() => {
     showStep(prev);
   }
 
-  return { selectTipo, selectSubtipo, calcular, nuevaMedida, back };
+  // ── Actualiza el badge del botón cotizar en paso 3 ──
+  function actualizarBadgePaso3(n) {
+    const badge = document.getElementById('cot-badge-paso3');
+    if (!badge) return;
+    if (n > 0) {
+      badge.textContent = n;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  return { selectTipo, selectSubtipo, calcular, calcularYCotizar, nuevaMedida, back, actualizarBadgePaso3 };
 })();

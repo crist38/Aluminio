@@ -212,7 +212,23 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px v
 }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); filter: brightness(1.1); }
 
-.btn-calcular { width: 100%; justify-content: center; font-size: 0.95rem; padding: 0.875rem; }
+.btn-calcular { justify-content: center; font-size: 0.95rem; padding: 0.875rem; flex: 1; }
+
+/* ── FILA CALCULAR + COTIZAR ── */
+.calcular-row {
+  display: flex; gap: 0.625rem; align-items: stretch;
+}
+.btn-cotizar-directo {
+  flex: 1; justify-content: center;
+  font-size: 0.875rem; padding: 0.875rem 1rem;
+  position: relative;
+}
+.cot-badge-inline {
+  background: rgba(255,255,255,0.25);
+  border-radius: 99px; padding: 0.05rem 0.45rem;
+  font-size: 0.72rem; font-weight: 800; min-width: 20px;
+  text-align: center; margin-left: 0.25rem;
+}
 
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 0.5rem;
