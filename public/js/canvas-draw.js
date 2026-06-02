@@ -1,287 +1,502 @@
 /**
- * canvas-draw.js — Visualización con HTML5 Canvas
- * Dibuja esquemas de ventanas, puertas y cubicación
+ * canvas-draw.js — Visualización estilo CAD Técnico
+ * Estética de plano técnico con colores de perfiles reales
  */
 
 const CanvasDraw = (() => {
 
-  const COLORS = {
-    frame:   '#00d4ff',
-    hoja:    '#7c3aed',
-    glass:   'rgba(147, 210, 255, 0.18)',
-    glassBorder: 'rgba(147, 210, 255, 0.5)',
-    text:    '#e2e8f0',
-    muted:   '#64748b',
-    grid:    '#2a3346',
-    arrow:   '#f59e0b',
-    bg:      '#1a1f2e',
+  // ── Paleta de colores por tipo de aluminio ──
+  const PROFILE_COLORS = {
+    'M':  { face: '#b0b8c8', edge: '#7a8494', shine: '#d8dde6', shadow: '#5a6270', label: 'Mate' },
+    'B':  { face: '#8a6a3a', edge: '#5a4020', shine: '#c09050', shadow: '#3a2810', label: 'Bronce' },
+    'BL': { face: '#d8dde6', edge: '#a0a8b4', shine: '#f0f3f7', shadow: '#7a8090', label: 'Blanco' },
+    'RO': { face: '#8b5e3c', edge: '#5a3820', shine: '#b87840', shadow: '#3a2010', label: 'Roble' },
+    'T':  { face: '#8090a8', edge: '#505e70', shine: '#b0bece', shadow: '#303840', label: 'Titanio' },
   };
 
-  function clearCanvas(canvas) {
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = COLORS.bg;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    return ctx;
+  const CAD = {
+    bg:         '#0d1117',
+    grid:       'rgba(30, 50, 80, 0.7)',
+    gridMinor:  'rgba(20, 35, 55, 0.5)',
+    glass:      'rgba(180, 220, 255, 0.10)',
+    glassEdge:  'rgba(140, 200, 255, 0.35)',
+    dim:        '#00d4ff',
+    dimText:    '#00d4ff',
+    text:       '#e2e8f0',
+    muted:      '#4a5568',
+    centerLine: 'rgba(0, 212, 255, 0.3)',
+    label:      '#f59e0b',
+    hatching:   'rgba(100, 140, 180, 0.15)',
+  };
+
+  // ── Obtener color de perfil del selector actual ──
+  function getProfileColor() {
+    const checked = document.querySelector('input[name="color"]:checked');
+    const key = checked ? checked.value : 'M';
+    return PROFILE_COLORS[key] || PROFILE_COLORS['M'];
   }
 
+  // ── Fondo CAD con grilla milimétrica ──
+  function drawCADBackground(ctx, W, H) {
+    ctx.fillStyle = CAD.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Grilla menor (5px)
+    ctx.strokeStyle = CAD.gridMinor;
+    ctx.lineWidth = 0.4;
+    for (let x = 0; x < W; x += 12) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 12) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // Grilla mayor (60px)
+    ctx.strokeStyle = CAD.grid;
+    ctx.lineWidth = 0.7;
+    for (let x = 0; x < W; x += 60) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 60) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+  }
+
+  // ── Sello técnico inferior ──
+  function drawStamp(ctx, W, H, cfg, label) {
+    const ph = getProfileColor();
+    ctx.fillStyle = 'rgba(13,17,23,0.85)';
+    ctx.fillRect(0, H - 22, W, 22);
+    ctx.strokeStyle = CAD.dim;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(0, H - 22); ctx.lineTo(W, H - 22); ctx.stroke();
+
+    ctx.font = '600 9px "JetBrains Mono", monospace';
+    ctx.fillStyle = CAD.dim;
+    ctx.textAlign = 'left';
+    ctx.fillText('PROWINDOWS LTDA.', 8, H - 8);
+
+    ctx.fillStyle = CAD.label;
+    ctx.textAlign = 'center';
+    ctx.fillText((label || cfg.rotu || 'VISTA PREVIA').toUpperCase(), W / 2, H - 8);
+
+    ctx.fillStyle = ph.face;
+    ctx.textAlign = 'right';
+    ctx.fillText(`COLOR: ${ph.label.toUpperCase()}`, W - 8, H - 8);
+  }
+
+  // ── Dibujar perfil de aluminio (rectángulo con acabado 3D) ──
+  function drawProfile(ctx, x, y, w, h, ph, vertical = false) {
+    // Sombra
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(x + 2, y + 2, w, h);
+
+    // Cara principal
+    const grad = vertical
+      ? ctx.createLinearGradient(x, y, x + w, y)
+      : ctx.createLinearGradient(x, y, x, y + h);
+    grad.addColorStop(0,   ph.shine);
+    grad.addColorStop(0.3, ph.face);
+    grad.addColorStop(0.7, ph.face);
+    grad.addColorStop(1,   ph.shadow);
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, y, w, h);
+
+    // Borde oscuro
+    ctx.strokeStyle = ph.edge;
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(x, y, w, h);
+
+    // Línea de brillo interior
+    ctx.strokeStyle = ph.shine;
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.4;
+    if (vertical) {
+      ctx.beginPath(); ctx.moveTo(x + 2, y + 1); ctx.lineTo(x + 2, y + h - 1); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(x + 1, y + 2); ctx.lineTo(x + w - 1, y + 2); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Línea de centro (chained) ──
+  function drawCenterLine(ctx, x1, y1, x2, y2) {
+    ctx.save();
+    ctx.strokeStyle = CAD.centerLine;
+    ctx.lineWidth = 0.7;
+    ctx.setLineDash([8, 3, 2, 3]);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // ── Acotado CAD ──
   function drawDimension(ctx, x1, y1, x2, y2, label, outside = false) {
-    ctx.strokeStyle = COLORS.arrow;
-    ctx.fillStyle = COLORS.arrow;
-    ctx.lineWidth = 1;
-    ctx.font = '11px Inter, sans-serif';
+    ctx.save();
+    ctx.strokeStyle = CAD.dim;
+    ctx.fillStyle   = CAD.dimText;
+    ctx.lineWidth   = 0.8;
+    ctx.font = 'bold 10px "JetBrains Mono", monospace';
 
     const isHoriz = Math.abs(y1 - y2) < 2;
-    const offset = outside ? -18 : 14;
+    const offset = 20;
 
     if (isHoriz) {
-      const y = y1 + (outside ? -offset : offset);
+      const y = outside ? y1 - offset : y1 + offset;
+      // Líneas de extensión
+      ctx.setLineDash([3, 3]);
       ctx.beginPath();
-      ctx.moveTo(x1, y); ctx.lineTo(x2, y);
       ctx.moveTo(x1, y1); ctx.lineTo(x1, y);
       ctx.moveTo(x2, y2); ctx.lineTo(x2, y);
       ctx.stroke();
-      // arrows
-      ctx.beginPath();
-      ctx.moveTo(x1 + 5, y - 3); ctx.lineTo(x1, y); ctx.lineTo(x1 + 5, y + 3); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x2 - 5, y - 3); ctx.lineTo(x2, y); ctx.lineTo(x2 - 5, y + 3); ctx.fill();
-      ctx.fillStyle = COLORS.arrow;
+      ctx.setLineDash([]);
+      // Línea de cota
+      ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+      // Flechas
+      _arrowH(ctx, x1, y, 1);
+      _arrowH(ctx, x2, y, -1);
+      // Texto con fondo
+      const mx = (x1 + x2) / 2;
+      const tw = ctx.measureText(label).width + 6;
+      ctx.fillStyle = CAD.bg;
+      ctx.fillRect(mx - tw / 2, y - 14, tw, 13);
+      ctx.fillStyle = CAD.dimText;
       ctx.textAlign = 'center';
-      ctx.fillText(label, (x1 + x2) / 2, y - 4);
+      ctx.fillText(label, mx, y - 4);
     } else {
-      const x = x1 + (outside ? -offset - 10 : offset);
+      const x = outside ? x1 - offset - 10 : x1 + offset;
+      ctx.setLineDash([3, 3]);
       ctx.beginPath();
-      ctx.moveTo(x, y1); ctx.lineTo(x, y2);
       ctx.moveTo(x1, y1); ctx.lineTo(x, y1);
       ctx.moveTo(x2, y2); ctx.lineTo(x, y2);
       ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x - 3, y1 + 5); ctx.lineTo(x, y1); ctx.lineTo(x + 3, y1 + 5); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x - 3, y2 - 5); ctx.lineTo(x, y2); ctx.lineTo(x + 3, y2 - 5); ctx.fill();
+      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y2); ctx.stroke();
+      _arrowV(ctx, x, y1, 1);
+      _arrowV(ctx, x, y2, -1);
+      const my = (y1 + y2) / 2;
       ctx.save();
-      ctx.translate(x - 4, (y1 + y2) / 2);
+      ctx.translate(x - 4, my);
       ctx.rotate(-Math.PI / 2);
+      const tw = ctx.measureText(label).width + 6;
+      ctx.fillStyle = CAD.bg;
+      ctx.fillRect(-tw / 2, -13, tw, 13);
+      ctx.fillStyle = CAD.dimText;
       ctx.textAlign = 'center';
-      ctx.fillStyle = COLORS.arrow;
-      ctx.fillText(label, 0, 0);
+      ctx.fillText(label, 0, -3);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  function _arrowH(ctx, x, y, dir) {
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + dir * 8, y - 3);
+    ctx.lineTo(x + dir * 8, y + 3);
+    ctx.closePath();
+    ctx.fillStyle = CAD.dim;
+    ctx.fill();
+  }
+  function _arrowV(ctx, x, y, dir) {
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - 3, y + dir * 8);
+    ctx.lineTo(x + 3, y + dir * 8);
+    ctx.closePath();
+    ctx.fillStyle = CAD.dim;
+    ctx.fill();
+  }
+
+  // ── Vidrio con trama hatching ──
+  function drawGlass(ctx, x, y, w, h) {
+    ctx.fillStyle = CAD.glass;
+    ctx.fillRect(x, y, w, h);
+    // Hatch diagonal
+    ctx.save();
+    ctx.strokeStyle = CAD.hatching;
+    ctx.lineWidth = 0.5;
+    ctx.clipRect ? null : ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    for (let i = -h; i < w + h; i += 14) {
+      ctx.beginPath();
+      ctx.moveTo(x + i, y);
+      ctx.lineTo(x + i + h, y + h);
+      ctx.stroke();
+    }
+    ctx.restore();
+    // Borde reflejo
+    ctx.strokeStyle = CAD.glassEdge;
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(x, y, w, h);
+    // Destellos de reflejo
+    const gr = ctx.createLinearGradient(x, y, x + w * 0.4, y + h * 0.4);
+    gr.addColorStop(0, 'rgba(255,255,255,0.08)');
+    gr.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gr;
+    ctx.fillRect(x, y, w, h);
+  }
+
+  // ── Ventana Corredera ──
+  function drawWindow(ctx, x, y, w, h, cfg) {
+    const ph   = getProfileColor();
+    const hojas = cfg.hoja || 2;
+    const fija  = cfg.fija || 0;
+    const fw    = Math.max(8, w * 0.045); // grosor de marco proporcional
+
+    // Marco exterior con perfil 3D
+    drawProfile(ctx, x, y, w, fw, ph);                    // top
+    drawProfile(ctx, x, y + h - fw, w, fw, ph);           // bottom
+    drawProfile(ctx, x, y, fw, h, ph, true);              // left
+    drawProfile(ctx, x + w - fw, y, fw, h, ph, true);     // right
+
+    // Área de vidrio total
+    drawGlass(ctx, x + fw, y + fw, w - fw * 2, h - fw * 2);
+
+    // Líneas de centro
+    drawCenterLine(ctx, x + w / 2, y + fw, x + w / 2, y + h - fw);
+    drawCenterLine(ctx, x + fw, y + h / 2, x + w - fw, y + h / 2);
+
+    // Divisores de hojas
+    const panelW = (w - fw * 2) / hojas;
+    for (let i = 0; i < hojas; i++) {
+      const px     = x + fw + panelW * i;
+      const isFija = fija > 0 && i >= hojas - fija;
+
+      if (i > 0) {
+        // Perfil divisor vertical entre hojas
+        const divW = fw * 0.6;
+        drawProfile(ctx, px - divW / 2, y + fw, divW, h - fw * 2, ph, true);
+      }
+
+      if (!isFija) {
+        // Flecha deslizante
+        const dir  = i % 2 === 0 ? 1 : -1;
+        const arX  = px + (dir > 0 ? panelW * 0.2 : panelW * 0.8);
+        const arY  = y + h / 2;
+        ctx.save();
+        ctx.strokeStyle = ph.shine;
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(arX, arY - 8); ctx.lineTo(arX + dir * 12, arY); ctx.lineTo(arX, arY + 8);
+        ctx.stroke();
+        ctx.restore();
+        // Tirón
+        const tiX = px + panelW / 2;
+        ctx.fillStyle = ph.edge;
+        ctx.fillRect(tiX - 2, y + h * 0.35, 4, h * 0.3);
+        ctx.strokeStyle = ph.shine;
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(tiX - 2, y + h * 0.35, 4, h * 0.3);
+      } else {
+        ctx.fillStyle = CAD.muted;
+        ctx.font = 'bold 8px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('FIJA', px + panelW / 2, y + h / 2 + 3);
+      }
+    }
+
+    // Perfiles palillo horizontal
+    if (cfg.pal === 'S') {
+      const py = y + h * 0.5;
+      drawProfile(ctx, x + fw, py - fw * 0.3, w - fw * 2, fw * 0.6, ph);
+    }
+  }
+
+  // ── Puerta Abatir / Vaivén ──
+  function drawDoor(ctx, x, y, w, h, cfg) {
+    const ph     = getProfileColor();
+    const isVaiv = cfg.lin && cfg.lin.includes('VAIVEN');
+    const fw     = Math.max(8, w * 0.05);
+
+    drawProfile(ctx, x, y, w, fw, ph);
+    drawProfile(ctx, x, y + h - fw, w, fw, ph);
+    drawProfile(ctx, x, y, fw, h, ph, true);
+    drawProfile(ctx, x + w - fw, y, fw, h, ph, true);
+    drawGlass(ctx, x + fw, y + fw, w - fw * 2, h - fw * 2);
+    drawCenterLine(ctx, x + w / 2, y + fw, x + w / 2, y + h - fw);
+
+    // Perfil hoja interior
+    const hw = fw * 0.55;
+    drawProfile(ctx, x + fw, y + fw, w - fw * 2, hw, ph);
+    drawProfile(ctx, x + fw, y + h - fw - hw, w - fw * 2, hw, ph);
+    drawProfile(ctx, x + fw, y + fw, hw, h - fw * 2, ph, true);
+    drawProfile(ctx, x + w - fw - hw, y + fw, hw, h - fw * 2, ph, true);
+
+    if (isVaiv) {
+      ctx.fillStyle = CAD.dim;
+      ctx.font = '22px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText('⇄', x + w / 2, y + h / 2 + 8);
+    } else {
+      // Arco de apertura
+      ctx.save();
+      ctx.strokeStyle = CAD.dim;
+      ctx.lineWidth = 0.8;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.arc(x + fw + hw, y + h - fw, w - fw * 2 - hw, -Math.PI / 2, 0);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // Tirón de puerta
+      ctx.fillStyle = ph.shine;
+      ctx.fillRect(x + w - fw - hw - 4, y + h * 0.4, 3, h * 0.2);
       ctx.restore();
     }
   }
 
-  function drawWindow(ctx, x, y, w, h, cfg) {
-    const hojas = cfg.hoja || 2;
-    const fija = cfg.fija || 0;
-    const frameW = 8;
-
-    // Outer frame
-    ctx.strokeStyle = COLORS.frame;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x, y, w, h);
-
-    // Glass area
-    ctx.fillStyle = COLORS.glass;
-    ctx.strokeStyle = COLORS.glassBorder;
-    ctx.lineWidth = 1;
-    ctx.fillRect(x + frameW, y + frameW, w - frameW * 2, h - frameW * 2);
-    ctx.strokeRect(x + frameW, y + frameW, w - frameW * 2, h - frameW * 2);
-
-    // Sliding panels
-    const panelW = (w - frameW * 2) / hojas;
-    for (let i = 0; i < hojas; i++) {
-      const px = x + frameW + panelW * i;
-      const isFijaPanel = fija > 0 && i >= hojas - fija;
-      ctx.strokeStyle = isFijaPanel ? COLORS.muted : COLORS.hoja;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(px, y + frameW, panelW, h - frameW * 2);
-
-      // Sliding indicator
-      if (!isFijaPanel) {
-        ctx.strokeStyle = COLORS.hoja;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        const dirX = i % 2 === 0 ? px + 10 : px + panelW - 10;
-        ctx.beginPath();
-        ctx.moveTo(dirX, y + h / 2 - 10);
-        ctx.lineTo(dirX, y + h / 2 + 10);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      } else {
-        // Fixed panel mark
-        ctx.fillStyle = COLORS.muted;
-        ctx.font = '9px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText('FIJA', px + panelW / 2, y + h / 2);
-      }
-    }
-  }
-
-  function drawDoor(ctx, x, y, w, h, cfg) {
-    const isVaiven = cfg.lin && cfg.lin.includes('VAIVEN');
-    const frameW = 8;
-
-    ctx.strokeStyle = COLORS.frame;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x, y, w, h);
-    ctx.fillStyle = COLORS.glass;
-    ctx.fillRect(x + frameW, y + frameW, w - frameW * 2, h - frameW * 2);
-
-    // Door panel
-    ctx.strokeStyle = COLORS.hoja;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + frameW, y + frameW, w - frameW * 2, h - frameW * 2);
-
-    if (isVaiven) {
-      // Double arrow for vaivén
-      ctx.fillStyle = COLORS.hoja;
-      ctx.font = '18px Inter';
-      ctx.textAlign = 'center';
-      ctx.fillText('⇄', x + w / 2, y + h / 2 + 6);
-    } else {
-      // Arc for abatir
-      ctx.strokeStyle = COLORS.hoja;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.arc(x + frameW, y + h - frameW, w - frameW * 2, -Math.PI / 2, 0);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-  }
-
+  // ── Shower Door ──
   function drawShower(ctx, x, y, w, h, cfg) {
-    const frameW = 8;
-    ctx.strokeStyle = COLORS.frame;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x, y, w, h);
-    ctx.fillStyle = COLORS.glass;
-    ctx.fillRect(x + frameW, y + frameW, w - frameW * 2, h - frameW * 2);
+    const ph = getProfileColor();
+    const fw = Math.max(8, w * 0.05);
 
-    // Sliding panels
-    const half = (w - frameW * 2) / 2;
-    ctx.strokeStyle = COLORS.hoja;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + frameW, y + frameW, half, h - frameW * 2);
-    ctx.strokeRect(x + frameW + half, y + frameW, half, h - frameW * 2);
+    drawProfile(ctx, x, y, w, fw, ph);
+    drawProfile(ctx, x, y + h - fw, w, fw, ph);
+    drawProfile(ctx, x, y, fw, h, ph, true);
+    drawProfile(ctx, x + w - fw, y, fw, h, ph, true);
+    drawGlass(ctx, x + fw, y + fw, w - fw * 2, h - fw * 2);
 
-    // Shower icon
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '20px Inter';
+    const half = (w - fw * 2) / 2;
+    const dw   = fw * 0.55;
+    drawProfile(ctx, x + fw + half - dw / 2, y + fw, dw, h - fw * 2, ph, true);
+
+    ctx.fillStyle = 'rgba(150,200,255,0.5)';
+    ctx.font = '18px Inter';
     ctx.textAlign = 'center';
     ctx.fillText('🚿', x + w / 2, y + h / 2 + 8);
   }
 
+  // ── Paño Fijo / Doble Contacto ──
   function drawPane(ctx, x, y, w, h, cfg) {
+    const ph   = getProfileColor();
     const pala = parseInt(cfg.pala) || 0;
     const pave = parseInt(cfg.pave) || 0;
-    const frameW = 8;
+    const fw   = Math.max(8, w * 0.045);
 
-    ctx.strokeStyle = COLORS.frame;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x, y, w, h);
-    ctx.fillStyle = COLORS.glass;
-    ctx.fillRect(x + frameW, y + frameW, w - frameW * 2, h - frameW * 2);
+    drawProfile(ctx, x, y, w, fw, ph);
+    drawProfile(ctx, x, y + h - fw, w, fw, ph);
+    drawProfile(ctx, x, y, fw, h, ph, true);
+    drawProfile(ctx, x + w - fw, y, fw, h, ph, true);
+    drawGlass(ctx, x + fw, y + fw, w - fw * 2, h - fw * 2);
 
-    // Horizontal dividers (pala)
+    drawCenterLine(ctx, x + w / 2, y + fw, x + w / 2, y + h - fw);
+    drawCenterLine(ctx, x + fw, y + h / 2, x + w - fw, y + h / 2);
+
+    const dw = fw * 0.5;
     if (pala > 0) {
-      const ih = (h - frameW * 2) / (pala + 1);
+      const ih = (h - fw * 2) / (pala + 1);
       for (let i = 1; i <= pala; i++) {
-        const py = y + frameW + ih * i;
-        ctx.strokeStyle = COLORS.hoja;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x + frameW, py); ctx.lineTo(x + w - frameW, py);
-        ctx.stroke();
+        const py = y + fw + ih * i;
+        drawProfile(ctx, x + fw, py - dw / 2, w - fw * 2, dw, ph);
+      }
+    }
+    if (pave > 0) {
+      const iw = (w - fw * 2) / (pave + 1);
+      for (let i = 1; i <= pave; i++) {
+        const px = x + fw + iw * i;
+        drawProfile(ctx, px - dw / 2, y + fw, dw, h - fw * 2, ph, true);
       }
     }
 
-    // Vertical dividers (pave)
-    if (pave > 0) {
-      const iw = (w - frameW * 2) / (pave + 1);
-      for (let i = 1; i <= pave; i++) {
-        const px = x + frameW + iw * i;
-        ctx.strokeStyle = COLORS.hoja;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(px, y + frameW); ctx.lineTo(px, y + h - frameW);
-        ctx.stroke();
-      }
-    }
+    // Etiqueta tipo en el centro del vidrio
+    const lin = (cfg.lin || cfg.subtipo || 'FIJO').split('_')[0];
+    ctx.fillStyle = 'rgba(0,212,255,0.5)';
+    ctx.font = 'bold 9px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(lin, x + w / 2, y + h / 2 + 3);
   }
 
+  // ── Dibujar preview ──
   function drawPreview(cfg) {
     const canvas = document.getElementById('preview-canvas');
     if (!canvas) return;
-    const ctx = clearCanvas(canvas);
+    const ctx = canvas.getContext('2d');
     const W = canvas.width;
     const H = canvas.height;
 
-    // Lee en mm, convierte a metros para el ratio visual
     const anchoMm = parseFloat(document.getElementById('inp-ancho')?.value) || 1200;
     const altoMm  = parseFloat(document.getElementById('inp-alto')?.value)  || 1000;
-    const ancho = anchoMm / 1000;
-    const alto  = altoMm  / 1000;
+    const ancho   = anchoMm / 1000;
+    const alto    = altoMm  / 1000;
 
-    const margin = 60;
-    const availW = W - margin * 2;
-    const availH = H - margin * 2;
-    const ratio = Math.min(availW / ancho, availH / alto);
+    ctx.clearRect(0, 0, W, H);
+    drawCADBackground(ctx, W, H);
+
+    const marginTop  = 30;
+    const marginBot  = 50;
+    const marginSide = 55;
+    const availW = W - marginSide * 2;
+    const availH = H - marginTop - marginBot;
+    const ratio  = Math.min(availW / ancho, availH / alto) * 0.82;
     const dw = ancho * ratio;
-    const dh = alto * ratio;
+    const dh = alto  * ratio;
     const ox = (W - dw) / 2;
-    const oy = (H - dh) / 2;
+    const oy = marginTop + (availH - dh) / 2;
 
     const tipo = cfg.tipo;
-    if (tipo === 'ventana-corr') drawWindow(ctx, ox, oy, dw, dh, cfg);
-    else if (tipo === 'shower') drawShower(ctx, ox, oy, dw, dh, cfg);
-    else if (tipo === 'puerta') drawDoor(ctx, ox, oy, dw, dh, cfg);
+    if      (tipo === 'ventana-corr')                       drawWindow(ctx, ox, oy, dw, dh, cfg);
+    else if (tipo === 'shower')                             drawShower(ctx, ox, oy, dw, dh, cfg);
+    else if (tipo === 'puerta')                             drawDoor(ctx, ox, oy, dw, dh, cfg);
     else if (tipo === 'pano-fijo' || tipo === 'ventana-doble') drawPane(ctx, ox, oy, dw, dh, cfg);
-    else drawPane(ctx, ox, oy, dw, dh, cfg);
+    else                                                    drawPane(ctx, ox, oy, dw, dh, cfg);
 
-    // Dimensiones en mm
     drawDimension(ctx, ox, oy + dh, ox + dw, oy + dh, `${Math.round(anchoMm)} mm`, false);
     drawDimension(ctx, ox + dw, oy, ox + dw, oy + dh, `${Math.round(altoMm)} mm`, false);
+    drawStamp(ctx, W, H, cfg, cfg.rotu);
   }
 
+  // ── Dibujar resultado ──
   function drawResult(cfg, resultado) {
     const canvas = document.getElementById('resultado-canvas');
     if (!canvas) return;
     const wrap = document.getElementById('canvas-resultado-wrap');
     if (wrap) wrap.style.display = 'block';
 
-    const ctx = clearCanvas(canvas);
+    const ctx = canvas.getContext('2d');
     const W = canvas.width;
     const H = canvas.height;
     const ancho = cfg.ancho || 1;
-    const alto  = cfg.alto || 1;
+    const alto  = cfg.alto  || 1;
 
-    const margin = 80;
-    const availW = W - margin * 2;
-    const availH = H - margin * 2;
-    const ratio = Math.min(availW / ancho, availH / alto) * 0.7;
+    ctx.clearRect(0, 0, W, H);
+    drawCADBackground(ctx, W, H);
+
+    const marginTop  = 40;
+    const marginBot  = 50;
+    const marginSide = 70;
+    const availW = W - marginSide * 2;
+    const availH = H - marginTop - marginBot;
+    const ratio  = Math.min(availW / ancho, availH / alto) * 0.75;
     const dw = ancho * ratio;
-    const dh = alto * ratio;
+    const dh = alto  * ratio;
     const ox = (W - dw) / 2;
-    const oy = (H - dh) / 2;
+    const oy = marginTop + (availH - dh) / 2;
 
     const tipo = cfg.tipo;
-    if (tipo === 'ventana-corr') drawWindow(ctx, ox, oy, dw, dh, cfg);
-    else if (tipo === 'shower') drawShower(ctx, ox, oy, dw, dh, cfg);
-    else if (tipo === 'puerta') drawDoor(ctx, ox, oy, dw, dh, cfg);
-    else drawPane(ctx, ox, oy, dw, dh, cfg);
+    if      (tipo === 'ventana-corr')                          drawWindow(ctx, ox, oy, dw, dh, cfg);
+    else if (tipo === 'shower')                                drawShower(ctx, ox, oy, dw, dh, cfg);
+    else if (tipo === 'puerta')                                drawDoor(ctx, ox, oy, dw, dh, cfg);
+    else                                                       drawPane(ctx, ox, oy, dw, dh, cfg);
 
     const anchoMm = cfg.anchoMm || (cfg.ancho * 1000);
     const altoMm  = cfg.altoMm  || (cfg.alto  * 1000);
+    drawDimension(ctx, ox, oy + dh, ox + dw, oy + dh, `${Math.round(anchoMm)} mm`, false);
+    drawDimension(ctx, ox + dw, oy, ox + dw, oy + dh, `${Math.round(altoMm)} mm`, false);
 
-    drawDimension(ctx, ox, oy + dh + 10, ox + dw, oy + dh + 10, `Ancho: ${Math.round(anchoMm)} mm`, false);
-    drawDimension(ctx, ox + dw + 10, oy, ox + dw + 10, oy + dh, `Alto: ${Math.round(altoMm)} mm`, false);
-
-    // Title
-    ctx.fillStyle = COLORS.text;
-    ctx.font = '600 13px Inter, sans-serif';
+    // Título del plano
+    ctx.fillStyle = CAD.dim;
+    ctx.font = '600 12px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(cfg.rotu || 'Esquema de Corte', W / 2, 28);
+    ctx.fillText((cfg.rotu || 'ESQUEMA').toUpperCase(), W / 2, 24);
+    ctx.strokeStyle = CAD.dim;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(W / 2 - 80, 28); ctx.lineTo(W / 2 + 80, 28);
+    ctx.stroke();
+
+    drawStamp(ctx, W, H, cfg, cfg.rotu);
   }
 
   return { drawPreview, drawResult };

@@ -185,6 +185,10 @@ const Wizard = (() => {
       const el = document.getElementById(id);
       if (el) el.oninput = () => CanvasDraw.drawPreview(cfg);
     });
+    // Conectar radio de color → redibuja perfiles en tiempo real
+    document.querySelectorAll('input[name="color"]').forEach(radio => {
+      radio.onchange = () => CanvasDraw.drawPreview(cfg);
+    });
     CanvasDraw.drawPreview(cfg);
 
     history.push('step-medidas');
