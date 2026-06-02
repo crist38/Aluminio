@@ -8,10 +8,10 @@ const CanvasDraw = (() => {
   // ── Paleta de colores por tipo de aluminio ──
   const PROFILE_COLORS = {
     'M':  { face: '#b0b8c8', edge: '#7a8494', shine: '#d8dde6', shadow: '#5a6270', label: 'Mate' },
-    'B':  { face: '#8a6a3a', edge: '#5a4020', shine: '#c09050', shadow: '#3a2810', label: 'Bronce' },
+    'B':  { face: '#2a2018', edge: '#0e0c08', shine: '#3e3020', shadow: '#0a0806', label: 'Bronce' },
     'BL': { face: '#d8dde6', edge: '#a0a8b4', shine: '#f0f3f7', shadow: '#7a8090', label: 'Blanco' },
     'RO': { face: '#8b5e3c', edge: '#5a3820', shine: '#b87840', shadow: '#3a2010', label: 'Roble' },
-    'T':  { face: '#8090a8', edge: '#505e70', shine: '#b0bece', shadow: '#303840', label: 'Titanio' },
+    'T':  { face: '#c8a96e', edge: '#8a7040', shine: '#e8cc90', shadow: '#7a5c28', label: 'Titanio' },
   };
 
   const CAD = {
