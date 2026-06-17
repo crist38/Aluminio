@@ -1359,22 +1359,7 @@ body.light-theme .modal-footer {
 
 /* ── FLOATING QUOTATION PANEL (BOTTOM DRAWER) ── */
 .cot-panel {
-  position: fixed;
-  bottom: 1.25rem;
-  left: 50%;
-  transform: translate(-50%, 0);
-  z-index: 400;
-  width: calc(100% - 3rem);
-  max-width: 1340px;
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(20, 184, 166, 0.25);
-  border-radius: var(--radius);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), var(--shadow-glow);
-  max-height: 300px;
-  overflow: hidden;
-  animation: slideUpFloating 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: none !important;
 }
 
 body.light-theme .cot-panel {

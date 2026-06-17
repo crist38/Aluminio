@@ -96,7 +96,6 @@ const Cotizacion = (() => {
 
     items.push(item);
     renderizarItems();
-    document.getElementById('panel-cotizacion').style.display = 'block';
     document.getElementById('cotizacion-count').textContent = items.length;
     if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
     App.toast(`✅ "${item.descripcion}" agregado a la cotización`, 'success');
@@ -140,7 +139,6 @@ const Cotizacion = (() => {
     document.getElementById('cot-desc-extra').value = '';
     App.toast(`✅ "${item.descripcion}" agregado a la cotización`, 'success');
     cerrarModal();
-    document.getElementById('panel-cotizacion').style.display = 'block';
     document.getElementById('cotizacion-count').textContent = items.length;
     if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
   }
