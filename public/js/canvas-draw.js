@@ -300,25 +300,26 @@ const CanvasDraw = (() => {
       }
 
       if (!isFija) {
-        // Flecha deslizante
+        // Flecha deslizante (remarcada en color cota CAD y mayor espesor)
         const dir  = i % 2 === 0 ? 1 : -1;
-        const arX  = px + (dir > 0 ? panelW * 0.2 : panelW * 0.8);
+        const arX  = px + (dir > 0 ? panelW * 0.25 : panelW * 0.75);
         const arY  = y + h / 2;
         ctx.save();
-        ctx.strokeStyle = ph.shine;
-        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = CAD.dim;
+        ctx.lineWidth = 2.2;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
         ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(arX, arY - 8); ctx.lineTo(arX + dir * 12, arY); ctx.lineTo(arX, arY + 8);
+        // Cuerpo de la flecha (eje horizontal)
+        ctx.moveTo(arX - dir * 6, arY);
+        ctx.lineTo(arX + dir * 10, arY);
+        // Punta de la flecha
+        ctx.moveTo(arX + dir * 4, arY - 5);
+        ctx.lineTo(arX + dir * 10, arY);
+        ctx.lineTo(arX + dir * 4, arY + 5);
         ctx.stroke();
         ctx.restore();
-        // Tirón
-        const tiX = px + panelW / 2;
-        ctx.fillStyle = ph.edge;
-        ctx.fillRect(tiX - 2, y + h * 0.35, 4, h * 0.3);
-        ctx.strokeStyle = ph.shine;
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(tiX - 2, y + h * 0.35, 4, h * 0.3);
       } else {
         ctx.fillStyle = CAD.muted;
         ctx.font = 'bold 8px "JetBrains Mono", monospace';
