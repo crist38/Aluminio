@@ -12,16 +12,49 @@ const Cotizacion = (() => {
 
   // ── Abre el modal de cotización con los datos del resultado actual ──
   function abrirModal(datosResultado) {
-    // datosResultado = { items, totales, cfg, canvasDataUrl }
     const modal = document.getElementById('modal-cotizacion');
     if (!modal) return;
 
-    // Pre-llena nombre de obra si existe
     const obra = document.getElementById('inp-obra')?.value || '';
     if (obra) document.getElementById('cot-cliente').value = obra;
 
-    // Guarda los datos del ítem actual para agregar
     modal._pendingData = datosResultado;
+    modal._mode = 'add';
+    
+    // Cambiar botón del modal para agregar ítem
+    const btnSubmit = modal.querySelector('.btn-cotizar');
+    if (btnSubmit) {
+      btnSubmit.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"/></svg>
+        Agregar a Cotización
+      `;
+      btnSubmit.onclick = () => agregarItem(modal._pendingData);
+    }
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // ── Abre el modal para configurar los datos del cliente antes de imprimir la cotización ──
+  function abrirModalPresupuesto() {
+    const modal = document.getElementById('modal-cotizacion');
+    if (!modal) return;
+
+    modal._mode = 'save';
+    
+    // Cambiar botón del modal para imprimir/guardar presupuesto
+    const btnSubmit = modal.querySelector('.btn-cotizar');
+    if (btnSubmit) {
+      btnSubmit.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Generar e Imprimir
+      `;
+      btnSubmit.onclick = () => {
+        cerrarModal();
+        imprimir();
+      };
+    }
+
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -31,6 +64,43 @@ const Cotizacion = (() => {
     if (!modal) return;
     modal.classList.remove('open');
     document.body.style.overflow = '';
+  }
+
+  // ── Agrega el ítem directamente sin pasar por el modal de cliente ──
+  function agregarItemDirecto(cfg, totales, canvasDataUrl) {
+    const colorMap  = { 'BL': 'Blanco', 'B': 'Bronce', 'M': 'Mate', 'RO': 'Roble', 'T': 'Titanio' };
+    const colorNom  = colorMap[cfg.coloalLabel || cfg.coloal] || cfg.coloal;
+    const vidrioMap = {
+      'VD4MM':'Vidrio 4mm Transparente','VD6MM':'Vidrio 6mm Transparente',
+      'VD4REF':'Vidrio 4mm Reflectante','VD6REF':'Vidrio 6mm Reflectante',
+      'ACRILICO':'Panel Acrílico','SV':'Sin Vidrio'
+    };
+    const vidrioNom = vidrioMap[cfg.vidi] || cfg.vidi;
+
+    const anchoMm = cfg.anchoMm || Math.round(cfg.ancho * 1000);
+    const altoMm  = cfg.altoMm  || Math.round(cfg.alto  * 1000);
+
+    const item = {
+      id:          Date.now(),
+      descripcion: cfg.rotu || 'Producto de Aluminio',
+      detalle:     `${anchoMm} × ${altoMm} mm · ${colorNom} · ${vidrioNom}`,
+      cantidad:    cfg.cant || 1,
+      precio:      totales.conIva,
+      precioUnit:  Math.round(totales.conIva / (cfg.cant || 1)),
+      neto:        totales.neto,
+      iva:         totales.iva,
+      imagen:      canvasDataUrl || null,
+      cfg:         { ...cfg },
+      totales:     { ...totales },
+    };
+
+    items.push(item);
+    renderizarItems();
+    document.getElementById('panel-cotizacion').style.display = 'block';
+    document.getElementById('cotizacion-count').textContent = items.length;
+    if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
+    App.toast(`✅ "${item.descripcion}" agregado a la cotización`, 'success');
+    return item;
   }
 
   // ── Agrega el ítem actual a la lista de cotización ──
@@ -428,12 +498,15 @@ const Cotizacion = (() => {
 
   return {
     abrirModal,
+    abrirModalPresupuesto,
     cerrarModal,
     agregarItem,
+    agregarItemDirecto,
     eliminarItem,
     renderizarItems,
     solicitarAgregar,
     imprimir,
     limpiar,
+    getItems: () => items,
   };
 })();

@@ -522,5 +522,91 @@ const Wizard = (() => {
     }
   }
 
-  return { selectTipo, selectSubtipo, calcular, calcularYCotizar, nuevaMedida, back, actualizarBadgePaso3, getCfg: () => cfg };
+  function agregarNuevaVentana() {
+    if (window._lastCfg && window._lastTotales) {
+      const items = Cotizacion.getItems();
+      const yaAgregado = items.some(item => 
+        item.cfg.anchoMm === window._lastCfg.anchoMm &&
+        item.cfg.altoMm === window._lastCfg.altoMm &&
+        item.cfg.tipo === window._lastCfg.tipo &&
+        item.cfg.subtipo === window._lastCfg.subtipo &&
+        item.cfg.cant === window._lastCfg.cant
+      );
+      if (!yaAgregado) {
+        const canvas = document.getElementById('resultado-canvas') || document.getElementById('preview-canvas');
+        const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
+        Cotizacion.agregarItemDirecto(window._lastCfg, window._lastTotales, canvasDataUrl);
+      }
+    }
+    cfg = {};
+    history = [];
+    showStep('step-tipo');
+    document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
+    App.toast('Iniciando nueva ventana para el presupuesto', '');
+  }
+
+  function guardarPresupuesto() {
+    const items = Cotizacion.getItems();
+    if (items.length === 0 && window._lastCfg && window._lastTotales) {
+      const canvas = document.getElementById('resultado-canvas') || document.getElementById('preview-canvas');
+      const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
+      Cotizacion.agregarItemDirecto(window._lastCfg, window._lastTotales, canvasDataUrl);
+    }
+    
+    if (Cotizacion.getItems().length === 0) {
+      App.toast('No hay ventanas agregadas al presupuesto', 'error');
+      return;
+    }
+    Cotizacion.abrirModalPresupuesto();
+  }
+
+  function duplicarVentana() {
+    if (!window._lastCfg || !window._lastTotales) {
+      App.toast('No hay ninguna ventana seleccionada para duplicar', 'error');
+      return;
+    }
+    const canvas = document.getElementById('resultado-canvas') || document.getElementById('preview-canvas');
+    const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
+    const duplicado = Cotizacion.agregarItemDirecto(window._lastCfg, window._lastTotales, canvasDataUrl);
+    if (duplicado) {
+      App.toast(`✅ Ventana "${duplicado.descripcion}" duplicada en la cotización`, 'success');
+    }
+  }
+
+  function eliminarVentana() {
+    if (!window._lastCfg) {
+      App.toast('No hay ninguna ventana seleccionada', 'error');
+      return;
+    }
+    const items = Cotizacion.getItems();
+    const itemCoincidente = [...items].reverse().find(item => 
+      item.cfg.anchoMm === window._lastCfg.anchoMm &&
+      item.cfg.altoMm === window._lastCfg.altoMm &&
+      item.cfg.tipo === window._lastCfg.tipo &&
+      item.cfg.subtipo === window._lastCfg.subtipo
+    );
+    if (itemCoincidente) {
+      Cotizacion.eliminarItem(itemCoincidente.id);
+      App.toast(`🗑️ Ventana "${itemCoincidente.descripcion}" eliminada del presupuesto`, 'warning');
+    } else {
+      App.toast('Esta ventana no estaba agregada al presupuesto', 'info');
+    }
+    nuevaMedida();
+  }
+
+  return { 
+    selectTipo, 
+    selectSubtipo, 
+    calcular, 
+    calcularYCotizar, 
+    nuevaMedida, 
+    back, 
+    actualizarBadgePaso3, 
+    getCfg: () => cfg,
+    agregarNuevaVentana,
+    guardarPresupuesto,
+    duplicarVentana,
+    eliminarVentana
+  };
 })();
