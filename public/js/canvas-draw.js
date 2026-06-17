@@ -291,7 +291,18 @@ const CanvasDraw = (() => {
     const panelW = (w - fw * 2) / hojas;
     for (let i = 0; i < hojas; i++) {
       const px     = x + fw + panelW * i;
-      const isFija = fija > 0 && i >= hojas - fija;
+      
+      // Determinar si esta hoja específica es fija
+      let isFija = false;
+      if (fija > 0) {
+        if (hojas === 3 && fija === 1) {
+          isFija = (i === 1); // La del medio es fija
+        } else if (hojas === 4 && fija === 2) {
+          isFija = (i === 1 || i === 2); // Las dos del medio son fijas
+        } else {
+          isFija = (i >= hojas - fija); // Por defecto (las últimas)
+        }
+      }
 
       if (i > 0) {
         // Perfil divisor vertical entre hojas
@@ -301,7 +312,15 @@ const CanvasDraw = (() => {
 
       if (!isFija) {
         // Flecha deslizante (remarcada en color cota CAD y mayor espesor)
-        const dir  = i % 2 === 0 ? 1 : -1;
+        let dir = 1;
+        if (hojas === 3 && i === 2) {
+          dir = -1; // En 3 hojas, la derecha desliza a la izquierda
+        } else if (hojas === 4 && i === 3) {
+          dir = -1; // En 4 hojas, la derecha desliza a la izquierda
+        } else {
+          dir = (i % 2 === 0) ? 1 : -1;
+        }
+
         const arX  = px + (dir > 0 ? panelW * 0.25 : panelW * 0.75);
         const arY  = y + h / 2;
         ctx.save();
