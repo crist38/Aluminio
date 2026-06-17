@@ -1,6 +1,5 @@
 /**
  * cotizacion.js — Módulo de Cotización para Cliente
- * Prowindows Limitada
  */
 
 const Cotizacion = (() => {
@@ -175,7 +174,7 @@ const Cotizacion = (() => {
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
-<title>Cotización ${folio} — Prowindows Limitada</title>
+<title>Cotización ${folio}</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
@@ -267,10 +266,9 @@ const Cotizacion = (() => {
   <!-- ENCABEZADO -->
   <div class="hdr">
     <div>
-      <div class="hdr-logo"><img src="${logoUrl}" alt="Prowindows Limitada"/></div>
       <div class="hdr-empresa">
-        <h1>Prowindows Limitada</h1>
-        <p>📍 Av. Gerónimo Méndez 2115, Galpón 17, Barrio Industrial — Coquimbo</p>
+        <h1>Cotización de Pautas de Corte</h1>
+        <p>Aluminio & Cristales</p>
       </div>
     </div>
     <div class="hdr-doc">
@@ -293,9 +291,8 @@ const Cotizacion = (() => {
     </div>
     <div class="datos-box">
       <h4>Emisor</h4>
-      <div class="row"><span class="lbl">Empresa:</span><span class="val">Prowindows Limitada</span></div>
-      <div class="row"><span class="lbl">Dirección:</span><span class="val">Av. Gerónimo Méndez 2115, G-17</span></div>
-      <div class="row"><span class="lbl">Ciudad:</span><span class="val">Barrio Industrial — Coquimbo</span></div>
+      <div class="row"><span class="lbl">Empresa:</span><span class="val">Cálculo de Pautas</span></div>
+      <div class="row"><span class="lbl">Detalle:</span><span class="val">Aluminio & Cristales</span></div>
     </div>
   </div>
 
@@ -358,7 +355,7 @@ const Cotizacion = (() => {
   <!-- FIRMAS -->
   <div class="firma-grid">
     <div class="firma-box">
-      <div class="firma-line">Firma y Timbre Prowindows Limitada</div>
+      <div class="firma-line">Firma y Timbre Emisor</div>
     </div>
     <div class="firma-box">
       <div class="firma-line">Firma y Conformidad del Cliente</div>
@@ -368,10 +365,8 @@ const Cotizacion = (() => {
   <!-- PIE DE PÁGINA -->
   <div class="doc-foot">
     <div class="doc-foot-left">
-      <img src="${logoUrl}" alt="Prowindows"/>
       <div class="doc-foot-info">
-        <div class="co">Prowindows Limitada</div>
-        <div class="addr">Av. Gerónimo Méndez 2115, Galpón 17, Barrio Industrial — Coquimbo</div>
+        <div class="co">Sistema de Pautas de Corte</div>
       </div>
     </div>
     <div class="doc-foot-right">

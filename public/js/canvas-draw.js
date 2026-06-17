@@ -4,6 +4,7 @@
  */
 
 const CanvasDraw = (() => {
+  let latestBox = null;
 
   // ── Paleta de colores por tipo de aluminio ──
   const PROFILE_COLORS = {
@@ -14,20 +15,40 @@ const CanvasDraw = (() => {
     'T':  { face: '#c8a96e', edge: '#8a7040', shine: '#e8cc90', shadow: '#7a5c28', label: 'Titanio' },
   };
 
-  const CAD = {
-    bg:         '#0d1117',
-    grid:       'rgba(30, 50, 80, 0.7)',
-    gridMinor:  'rgba(20, 35, 55, 0.5)',
-    glass:      'rgba(180, 220, 255, 0.10)',
-    glassEdge:  'rgba(140, 200, 255, 0.35)',
-    dim:        '#00d4ff',
-    dimText:    '#00d4ff',
-    text:       '#e2e8f0',
-    muted:      '#4a5568',
-    centerLine: 'rgba(0, 212, 255, 0.3)',
-    label:      '#f59e0b',
-    hatching:   'rgba(100, 140, 180, 0.15)',
-  };
+  function getCADColors() {
+    const isLight = document.body.classList.contains('light-theme');
+    if (isLight) {
+      return {
+        bg:         '#f8fafc',
+        grid:       'rgba(13, 148, 136, 0.12)',
+        gridMinor:  'rgba(13, 148, 136, 0.04)',
+        glass:      'rgba(5, 150, 105, 0.06)',
+        glassEdge:  'rgba(5, 150, 105, 0.3)',
+        dim:        '#0d9488',
+        dimText:    '#0d9488',
+        text:       '#334155',
+        muted:      '#94a3b8',
+        centerLine: 'rgba(13, 148, 136, 0.25)',
+        label:      '#d97706',
+        hatching:   'rgba(13, 148, 136, 0.08)',
+      };
+    } else {
+      return {
+        bg:         '#060913',
+        grid:       'rgba(20, 184, 166, 0.15)',
+        gridMinor:  'rgba(20, 184, 166, 0.06)',
+        glass:      'rgba(52, 211, 153, 0.08)',
+        glassEdge:  'rgba(52, 211, 153, 0.35)',
+        dim:        '#14b8a6',
+        dimText:    '#14b8a6',
+        text:       '#cbd5e1',
+        muted:      '#475569',
+        centerLine: 'rgba(20, 184, 166, 0.3)',
+        label:      '#f59e0b',
+        hatching:   'rgba(20, 184, 166, 0.1)',
+      };
+    }
+  }
 
   // ── Obtener color de perfil del selector actual ──
   function getProfileColor() {
@@ -38,6 +59,7 @@ const CanvasDraw = (() => {
 
   // ── Fondo CAD con grilla milimétrica ──
   function drawCADBackground(ctx, W, H) {
+    const CAD = getCADColors();
     ctx.fillStyle = CAD.bg;
     ctx.fillRect(0, 0, W, H);
 
@@ -64,6 +86,7 @@ const CanvasDraw = (() => {
 
   // ── Sello técnico inferior ──
   function drawStamp(ctx, W, H, cfg, label) {
+    const CAD = getCADColors();
     const ph = getProfileColor();
     ctx.fillStyle = 'rgba(13,17,23,0.85)';
     ctx.fillRect(0, H - 22, W, 22);
@@ -74,7 +97,7 @@ const CanvasDraw = (() => {
     ctx.font = '600 9px "JetBrains Mono", monospace';
     ctx.fillStyle = CAD.dim;
     ctx.textAlign = 'left';
-    ctx.fillText('PROWINDOWS LTDA.', 8, H - 8);
+    ctx.fillText('SISTEMA DE PAUTAS', 8, H - 8);
 
     ctx.fillStyle = CAD.label;
     ctx.textAlign = 'center';
@@ -121,6 +144,7 @@ const CanvasDraw = (() => {
 
   // ── Línea de centro (chained) ──
   function drawCenterLine(ctx, x1, y1, x2, y2) {
+    const CAD = getCADColors();
     ctx.save();
     ctx.strokeStyle = CAD.centerLine;
     ctx.lineWidth = 0.7;
@@ -132,6 +156,7 @@ const CanvasDraw = (() => {
 
   // ── Acotado CAD ──
   function drawDimension(ctx, x1, y1, x2, y2, label, outside = false) {
+    const CAD = getCADColors();
     ctx.save();
     ctx.strokeStyle = CAD.dim;
     ctx.fillStyle   = CAD.dimText;
@@ -190,6 +215,7 @@ const CanvasDraw = (() => {
   }
 
   function _arrowH(ctx, x, y, dir) {
+    const CAD = getCADColors();
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x + dir * 8, y - 3);
@@ -199,6 +225,7 @@ const CanvasDraw = (() => {
     ctx.fill();
   }
   function _arrowV(ctx, x, y, dir) {
+    const CAD = getCADColors();
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(x - 3, y + dir * 8);
@@ -210,6 +237,7 @@ const CanvasDraw = (() => {
 
   // ── Vidrio con trama hatching ──
   function drawGlass(ctx, x, y, w, h) {
+    const CAD = getCADColors();
     ctx.fillStyle = CAD.glass;
     ctx.fillRect(x, y, w, h);
     // Hatch diagonal
@@ -240,6 +268,7 @@ const CanvasDraw = (() => {
 
   // ── Ventana Corredera ──
   function drawWindow(ctx, x, y, w, h, cfg) {
+    const CAD = getCADColors();
     const ph   = getProfileColor();
     const hojas = cfg.hoja || 2;
     const fija  = cfg.fija || 0;
@@ -307,6 +336,7 @@ const CanvasDraw = (() => {
 
   // ── Puerta Abatir / Vaivén ──
   function drawDoor(ctx, x, y, w, h, cfg) {
+    const CAD = getCADColors();
     const ph     = getProfileColor();
     const isVaiv = cfg.lin && cfg.lin.includes('VAIVEN');
     const fw     = Math.max(8, w * 0.05);
@@ -349,6 +379,7 @@ const CanvasDraw = (() => {
 
   // ── Shower Door ──
   function drawShower(ctx, x, y, w, h, cfg) {
+    const CAD = getCADColors();
     const ph = getProfileColor();
     const fw = Math.max(8, w * 0.05);
 
@@ -370,6 +401,7 @@ const CanvasDraw = (() => {
 
   // ── Paño Fijo / Doble Contacto ──
   function drawPane(ctx, x, y, w, h, cfg) {
+    const CAD = getCADColors();
     const ph   = getProfileColor();
     const pala = parseInt(cfg.pala) || 0;
     const pave = parseInt(cfg.pave) || 0;
@@ -445,10 +477,34 @@ const CanvasDraw = (() => {
     drawDimension(ctx, ox, oy + dh, ox + dw, oy + dh, `${Math.round(anchoMm)} mm`, false);
     drawDimension(ctx, ox + dw, oy, ox + dw, oy + dh, `${Math.round(altoMm)} mm`, false);
     drawStamp(ctx, W, H, cfg, cfg.rotu);
+    latestBox = { ox, oy, dw, dh, ratio, W, H, anchoMm, altoMm };
+
+    // Posicionar dinámicamente los inputs sobre las cotas (flechas de medida)
+    const cadWidthInput = document.getElementById('cad-width-input');
+    const cadHeightInput = document.getElementById('cad-height-input');
+    
+    if (cadWidthInput) {
+      const wPct = ((ox + dw / 2) / W) * 100;
+      const hPct = ((oy + dh + 20) / H) * 100;
+      cadWidthInput.style.left = `${wPct}%`;
+      cadWidthInput.style.top = `${hPct}%`;
+      cadWidthInput.style.bottom = 'auto';
+      cadWidthInput.style.transform = 'translate(-50%, -50%)';
+    }
+    
+    if (cadHeightInput) {
+      const wPct = ((ox + dw + 20) / W) * 100;
+      const hPct = ((oy + dh / 2) / H) * 100;
+      cadHeightInput.style.left = `${wPct}%`;
+      cadHeightInput.style.top = `${hPct}%`;
+      cadHeightInput.style.right = 'auto';
+      cadHeightInput.style.transform = 'translate(-50%, -50%)';
+    }
   }
 
   // ── Dibujar resultado ──
   function drawResult(cfg, resultado) {
+    const CAD = getCADColors();
     const canvas = document.getElementById('resultado-canvas');
     if (!canvas) return;
     const wrap = document.getElementById('canvas-resultado-wrap');
@@ -499,5 +555,5 @@ const CanvasDraw = (() => {
     drawStamp(ctx, W, H, cfg, cfg.rotu);
   }
 
-  return { drawPreview, drawResult };
+  return { drawPreview, drawResult, getLatestBox: () => latestBox };
 })();

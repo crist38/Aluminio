@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prowindows Limitada — Sistema de Pautas de Corte</title>
-  <meta name="description" content="Prowindows Limitada — Sistema de cálculo de pautas de corte para ventanas, puertas y shower doors de aluminio. Coquimbo, Chile." />
+  <title>Sistema de Pautas de Corte</title>
+  <meta name="description" content="Sistema de cálculo de pautas de corte para ventanas, puertas y shower doors de aluminio." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -15,12 +15,9 @@
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
-        <div class="brand-logo">
-          <img src="/logo.png" alt="Prowindows Limitada" />
-        </div>
         <div>
-          <h1>Prowindows Limitada</h1>
-          <span class="subtitle">Sistema de Pautas de Corte</span>
+          <h1>Sistema de Pautas de Corte</h1>
+          <span class="subtitle">Aluminio & Cristales</span>
         </div>
       </div>
       <nav class="header-nav">
@@ -32,6 +29,12 @@
         <button id="nav-precios" class="nav-btn" onclick="App.showSection('precios')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
           Precios
+        </button>
+
+        <button id="theme-toggle" class="nav-btn theme-toggle-btn" onclick="App.toggleTheme()" title="Cambiar tema">
+          <svg id="theme-sun" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="theme-moon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span id="theme-label">Claro</span>
         </button>
       </nav>
     </div>
@@ -57,27 +60,37 @@
           </div>
           <div class="card-grid">
             <button class="product-card" onclick="Wizard.selectTipo('ventana-corr')" id="card-ventana-corr">
-              <div class="card-icon">🪟</div>
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+              </div>
               <div class="card-label">Ventanas Correderas</div>
               <div class="card-desc">AL/15 · AL/20 · AL/25 · L5000</div>
             </button>
             <button class="product-card" onclick="Wizard.selectTipo('ventana-doble')" id="card-ventana-doble">
-              <div class="card-icon">🪟</div>
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 12h18M12 3v9M7 8h2M14 15h3M14 18h2"/></svg>
+              </div>
               <div class="card-label">Doble Contacto</div>
               <div class="card-desc">Proyectantes · Abatir · AL/32 · AL/42</div>
             </button>
             <button class="product-card" onclick="Wizard.selectTipo('shower')" id="card-shower">
-              <div class="card-icon">🚿</div>
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4V4z"/><path d="M12 4v16M8 8h1M16 12h1"/><path d="M7 2a1 1 0 0 1 1 1v1M17 2a1 1 0 0 1-1 1v1"/></svg>
+              </div>
               <div class="card-label">Shower Doors</div>
               <div class="card-desc">Receptáculo · Tinas AM-12</div>
             </button>
             <button class="product-card" onclick="Wizard.selectTipo('puerta')" id="card-puerta">
-              <div class="card-icon">🚪</div>
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3V3z"/><path d="M9 3v18M18 11h1M18 13h1"/></svg>
+              </div>
               <div class="card-label">Puertas</div>
               <div class="card-desc">Abatir · Vaivén · Marcos</div>
             </button>
             <button class="product-card" onclick="Wizard.selectTipo('pano-fijo')" id="card-pano-fijo">
-              <div class="card-icon">⬛</div>
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 3l18 18M3 21L21 3"/></svg>
+              </div>
               <div class="card-label">Paños Fijos</div>
               <div class="card-desc">AL/32 · AL/42 · Tubos</div>
             </button>
@@ -103,7 +116,19 @@
           </div>
 
           <div class="form-layout">
-            <!-- Columna izquierda: datos generales -->
+            <!-- Columna izquierda: Visor CAD interactivo prominente -->
+            <div class="canvas-container" style="flex: 1;">
+              <div class="canvas-corners-decor"></div>
+              <div class="canvas-wrapper" style="position: relative; display: inline-block; max-width: 100%;">
+                <div class="cad-overlay-container">
+                  <input type="number" id="cad-width-input" class="cad-input-overlay" min="100" max="10000" step="1" title="Editar Ancho" />
+                  <input type="number" id="cad-height-input" class="cad-input-overlay" min="100" max="10000" step="1" title="Editar Alto" />
+                </div>
+                <canvas id="preview-canvas" width="760" height="420"></canvas>
+              </div>
+            </div>
+
+            <!-- Columna derecha: Formulario unificado -->
             <div class="form-col">
               <div class="form-section-title">📋 Datos del Proyecto</div>
               <div class="form-group">
@@ -135,11 +160,8 @@
               <!-- Opciones extras dinámicas -->
               <div id="opciones-dinamicas" class="form-section-title" style="display:none">⚙️ Opciones</div>
               <div id="opciones-form"></div>
-            </div>
 
-            <!-- Columna derecha: medidas y cálculo -->
-            <div class="form-col">
-              <div class="form-section-title">📐 Medidas</div>
+              <div class="form-section-title">📐 Medidas y Cálculo</div>
               <div class="medidas-row">
                 <div class="form-group">
                   <label>Ancho (mm)</label>
@@ -150,25 +172,19 @@
                   <input type="number" id="inp-alto" step="1" min="100" max="10000" placeholder="1000" />
                 </div>
               </div>
-              <div class="medidas-row">
+              <div class="medidas-row three">
                 <div class="form-group">
                   <label>Cantidad</label>
                   <input type="number" id="inp-cant" value="1" min="1" max="999" />
                 </div>
                 <div class="form-group">
-                  <label>% Precio Aluminio</label>
+                  <label>% P. Alum.</label>
                   <input type="number" id="inp-porce" value="100" min="1" max="500" />
                 </div>
                 <div class="form-group">
                   <label>IVA (%)</label>
                   <input type="number" id="inp-iva" value="19" min="0" max="50" />
                 </div>
-              </div>
-
-              <!-- Canvas preview -->
-              <div class="canvas-container">
-                <canvas id="preview-canvas" width="460" height="240"></canvas>
-                <div class="canvas-label">Vista previa esquemática</div>
               </div>
 
               <div class="calcular-row">
@@ -178,7 +194,7 @@
                 </button>
                 <button class="btn-cotizar btn-cotizar-directo" id="btn-cotizar-paso3" onclick="Wizard.calcularYCotizar()">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-                  + Agregar a Cotización
+                  + Cotizar
                   <span class="cot-badge-inline" id="cot-badge-paso3" style="display:none">0</span>
                 </button>
               </div>
@@ -213,7 +229,9 @@
             </table>
           </div>
           <div class="canvas-container" id="canvas-resultado-wrap" style="display:none">
+            <div class="canvas-corners-decor"></div>
             <canvas id="resultado-canvas" width="700" height="400"></canvas>
+            <div class="canvas-label">Plano Técnico de Corte</div>
           </div>
           <div class="action-bar">
             <button class="btn-secondary" onclick="Wizard.nuevaMedida()">
@@ -274,10 +292,8 @@
   <footer class="app-footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        <img src="/logo.png" alt="Prowindows" class="footer-logo" />
         <div>
-          <div class="footer-company">Prowindows Limitada</div>
-          <div class="footer-address">Av. Gerónimo Méndez 2115, Galpón 17, Barrio Industrial — Coquimbo</div>
+          <div class="footer-company">Sistema de Pautas de Corte</div>
         </div>
       </div>
       <div class="footer-credit">Desarrollado por <strong>Cristian Pereira</strong></div>
@@ -361,6 +377,7 @@
   <script src="/js/precios.js"></script>
   <script src="/js/calculos.js"></script>
   <script src="/js/canvas-draw.js"></script>
+  <script src="/js/canvas-interactive.js"></script>
   <script src="/js/wizard.js"></script>
   <script src="/js/cotizacion.js"></script>
   <script src="/js/app.js"></script>

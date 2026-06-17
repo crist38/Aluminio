@@ -27,12 +27,51 @@ const App = (() => {
     toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
   }
 
+  function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    _updateThemeUI(isLight);
+  }
+
+  function _updateThemeUI(isLight) {
+    const sun = document.getElementById('theme-sun');
+    const moon = document.getElementById('theme-moon');
+    const label = document.getElementById('theme-label');
+    if (isLight) {
+      if (sun) sun.style.display = 'inline-block';
+      if (moon) moon.style.display = 'none';
+      if (label) label.textContent = 'Oscuro';
+    } else {
+      if (sun) sun.style.display = 'none';
+      if (moon) moon.style.display = 'inline-block';
+      if (label) label.textContent = 'Claro';
+    }
+    // Redibuja canvas en tiempo real
+    if (typeof CanvasDraw !== 'undefined') {
+      const cfg = window._lastCfg || { tipo: 'ventana-corr' };
+      CanvasDraw.drawPreview(cfg);
+      const resCanvas = document.getElementById('resultado-canvas');
+      if (resCanvas && document.getElementById('step-resultado').classList.contains('active')) {
+        CanvasDraw.drawResult(cfg, { items: [], totales: window._lastTotales || { kilos:0, metros:0, aluminio:0, accesorios:0, cristal:0, neto:0, iva:19, conIva:0 }, cfg });
+      }
+    }
+  }
+
   function init() {
+    const savedTheme = localStorage.getItem('theme');
+    const isLight = savedTheme === 'light';
+    if (isLight) {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+    _updateThemeUI(isLight);
+
     showSection('cortes');
     console.log('%c✅ Sistema de Aluminio v2 iniciado', 'color:#00d4ff;font-weight:bold;font-size:14px');
   }
 
-  return { showSection, toast, init };
+  return { showSection, toast, init, toggleTheme };
 })();
 
 // ── Módulo de Impresión y PDF ──
@@ -53,7 +92,7 @@ const Imprimir = (() => {
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <title>Prowindows Limitada — ${titulo}</title>
+  <title>Sistema de Pautas — ${titulo}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -114,11 +153,9 @@ const Imprimir = (() => {
     <!-- ENCABEZADO -->
     <div class="doc-header">
       <div class="doc-brand">
-        <img src="${logoUrl}" alt="Prowindows Limitada" />
         <div class="brand-text">
-          <h1>Prowindows Limitada</h1>
-          <p>Sistema Técnico de Pautas de Corte de Aluminio</p>
-          <p class="address">📍 Av. Gerónimo Méndez 2115, Galpón 17, Barrio Industrial — Coquimbo</p>
+          <h1>Sistema Técnico de Pautas de Corte</h1>
+          <p>Cálculo de Pautas de Corte de Aluminio & Cristales</p>
         </div>
       </div>
       <div class="doc-meta">
@@ -157,10 +194,8 @@ const Imprimir = (() => {
     <!-- PIE DE PÁGINA -->
     <div class="doc-footer">
       <div class="doc-footer-left">
-        <img src="${logoUrl}" alt="Prowindows" />
         <div class="doc-footer-info">
-          <div class="co">Prowindows Limitada</div>
-          <div class="addr">Av. Gerónimo Méndez 2115, Galpón 17, Barrio Industrial — Coquimbo</div>
+          <div class="co">Sistema de Pautas de Corte</div>
         </div>
       </div>
       <div class="doc-footer-right">

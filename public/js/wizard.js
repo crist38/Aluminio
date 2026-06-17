@@ -107,6 +107,96 @@ const Wizard = (() => {
     'AL32_PANO': 'AL32_PANO', 'AL42_PANO': 'AL42_PANO', 'FIJO_TUBOS': 'FIJO_TUBOS',
   };
 
+  function getSubtipoSVG(id) {
+    if (['AL15', 'AL20', 'AL25', 'L5000'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="10" width="84" height="60" rx="3" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="12" y="14" width="38" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <rect x="50" y="14" width="38" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <rect x="16" y="32" width="2" height="16" rx="1" fill="currentColor" opacity="0.6"/>
+        <rect x="82" y="32" width="2" height="16" rx="1" fill="currentColor" opacity="0.6"/>
+        <path d="M22 40h16m0 0l-4-4m4 4l-4 4" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="28" y="33" fill="#10b981" font-size="8" font-weight="bold" font-family="monospace">2</text>
+        <path d="M78 40h-16m0 0l4-4m-4 4l4 4" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="66" y="33" fill="#10b981" font-size="8" font-weight="bold" font-family="monospace">1</text>
+      </svg>`;
+    }
+    if (['AL32_ABATIR', 'AL42_ABATIR'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="10" width="70" height="60" rx="3" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="19" y="14" width="62" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <path d="M19 14l12 30h38l12-30" stroke="#3b82f6" stroke-width="1.8" stroke-dasharray="4,3"/>
+        <rect x="46" y="58" width="8" height="2" rx="0.5" fill="currentColor" opacity="0.6"/>
+      </svg>`;
+    }
+    if (['AL32_ABATIR_D', 'AL42_ABATIR_D'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="80" height="60" rx="3" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="14" y="14" width="35" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <path d="M14 14l35 26M14 66l35-26" stroke="#eab308" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <rect x="49" y="14" width="37" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <path d="M86 14L49 40M86 66L49 40" stroke="#eab308" stroke-width="1.5" stroke-dasharray="3,2"/>
+      </svg>`;
+    }
+    if (['AM12_RECEP', 'AM12_TINAS'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="10" width="64" height="60" rx="2" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="22" y="14" width="27" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <rect x="49" y="14" width="27" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.04)"/>
+        <circle cx="50" cy="24" r="3" fill="currentColor"/>
+        <path d="M47 30l-2 6M50 31v6M53 30l2 6" stroke="#14b8a6" stroke-width="1.5"/>
+      </svg>`;
+    }
+    if (['AM35_ABATIR_90', 'AM35_ABATIR_45', 'PUERTA_ABATIR_TUBOS'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="10" width="50" height="60" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="29" y="14" width="42" height="52" stroke="currentColor" stroke-width="1.5" fill="rgba(20, 184, 166, 0.02)"/>
+        <rect x="63" y="36" width="2" height="8" rx="0.5" fill="currentColor" opacity="0.6"/>
+        <path d="M71 60a42 42 0 0 0-42-42" stroke="#10b981" stroke-width="1.8" stroke-dasharray="3,2"/>
+      </svg>`;
+    }
+    if (['AM35_VAIVEN', 'PUERTA_VAIVEN_TUBULAR'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="10" width="50" height="60" stroke="currentColor" stroke-width="2.5"/>
+        <rect x="29" y="14" width="42" height="52" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M38 40l-5-5m5 5l-5 5m5-5h24m0 0l-5-5m5 5l-5 5" stroke="#10b981" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>`;
+    }
+    if (id.startsWith('MARCO_')) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M30 70V15h40v55" stroke="currentColor" stroke-width="4" fill="none"/>
+        <path d="M26 70V11h48v59" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5"/>
+      </svg>`;
+    }
+    if (['AL32_PANO', 'AL42_PANO'].includes(id)) {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="15" y="15" width="70" height="50" rx="2" stroke="currentColor" stroke-width="3"/>
+        <rect x="20" y="20" width="60" height="40" stroke="currentColor" stroke-width="1" fill="rgba(20, 184, 166, 0.04)"/>
+        <path d="M60 26l8 8M64 26l4 4" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+      </svg>`;
+    }
+    if (id === 'FIJO_TUBOS') {
+      return `
+      <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="15" width="60" height="50" stroke="currentColor" stroke-width="3"/>
+        <line x1="50" y1="15" x2="50" y2="65" stroke="currentColor" stroke-width="2"/>
+        <line x1="20" y1="40" x2="80" y2="40" stroke="currentColor" stroke-width="1.5"/>
+      </svg>`;
+    }
+    return `
+    <svg viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="15" y="15" width="70" height="50" rx="2" stroke="currentColor" stroke-width="2"/>
+    </svg>`;
+  }
+
   function showStep(id) {
     document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -120,11 +210,21 @@ const Wizard = (() => {
     const container = document.getElementById('subtipo-options');
     container.innerHTML = '';
     menu.subs.forEach(sub => {
-      const btn = document.createElement('button');
-      btn.className = 'option-btn';
-      btn.textContent = sub.label;
-      btn.onclick = () => selectSubtipo(tipo, sub.id, sub.label);
-      container.appendChild(btn);
+      const card = document.createElement('div');
+      card.className = 'option-card';
+      card.onclick = () => selectSubtipo(tipo, sub.id, sub.label);
+      
+      const preview = document.createElement('div');
+      preview.className = 'option-card-preview';
+      preview.innerHTML = getSubtipoSVG(sub.id);
+      
+      const label = document.createElement('div');
+      label.className = 'option-card-label';
+      label.textContent = sub.label;
+      
+      card.appendChild(preview);
+      card.appendChild(label);
+      container.appendChild(card);
     });
     history.push('step-subtipo');
     showStep('step-subtipo');
@@ -409,5 +509,5 @@ const Wizard = (() => {
     }
   }
 
-  return { selectTipo, selectSubtipo, calcular, calcularYCotizar, nuevaMedida, back, actualizarBadgePaso3 };
+  return { selectTipo, selectSubtipo, calcular, calcularYCotizar, nuevaMedida, back, actualizarBadgePaso3, getCfg: () => cfg };
 })();
