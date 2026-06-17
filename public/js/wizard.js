@@ -522,8 +522,58 @@ const Wizard = (() => {
     }
   }
 
-  function agregarNuevaVentana() {
-    if (window._lastCfg && window._lastTotales) {
+  async function syncCurrentConfig() {
+    const obra    = document.getElementById('inp-obra')?.value.trim() || '';
+    const anchoMm = parseFloat(document.getElementById('inp-ancho')?.value);
+    const altoMm  = parseFloat(document.getElementById('inp-alto')?.value);
+    const cant    = parseInt(document.getElementById('inp-cant')?.value) || 1;
+    const porce   = parseFloat(document.getElementById('inp-porce')?.value) || 100;
+    const iva     = parseFloat(document.getElementById('inp-iva')?.value) || 19;
+    const vidi    = document.getElementById('sel-vidrio')?.value || 'VD4MM';
+    const coloal  = document.querySelector('input[name="color"]:checked')?.value || 'M';
+
+    if (!anchoMm || !altoMm || anchoMm < 100 || altoMm < 100) {
+      return false;
+    }
+
+    const ancho = anchoMm / 1000;
+    const alto  = altoMm  / 1000;
+    const colorSufijo = { 'BL': 'M', 'B': 'B', 'M': 'M', 'RO': 'M', 'T': 'M' };
+    const coloalCalc  = colorSufijo[coloal] || 'M';
+
+    _readOpciones();
+
+    cfg = {
+      ...cfg, obra, ancho, alto, anchoMm, altoMm, cant, porce, iva, vidi,
+      coloal: coloalCalc,
+      coloalLabel: coloal,
+      hoja:  cfg.hoja  || 2,
+      fija:  cfg.fija  || 0,
+      pal:   cfg.pal   || 'N',
+      pala:  parseFloat(cfg.pala)  || 0,
+      pave:  parseFloat(cfg.pave)  || 0,
+      car:   cfg.car   || 'N',
+      cam:   cfg.cam   || 'N',
+      fondo: parseFloat(cfg.fondo) || 0,
+      bisa:  parseFloat(cfg.bisa)  || 3,
+      jun:   'ALCO5051',
+    };
+
+    try {
+      preciosData = await Precios.getData();
+      const resultado = Calculos.calcular(cfg, preciosData);
+      window._lastCfg     = { ...cfg };
+      window._lastTotales = { ...resultado.totales };
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async function agregarNuevaVentana() {
+    const synced = await syncCurrentConfig();
+    if (synced && window._lastCfg && window._lastTotales) {
       const items = Cotizacion.getItems();
       const yaAgregado = items.some(item => 
         item.cfg.anchoMm === window._lastCfg.anchoMm &&
@@ -533,10 +583,13 @@ const Wizard = (() => {
         item.cfg.cant === window._lastCfg.cant
       );
       if (!yaAgregado) {
-        const canvas = document.getElementById('resultado-canvas') || document.getElementById('preview-canvas');
+        const canvas = document.getElementById('preview-canvas') || document.getElementById('resultado-canvas');
         const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
         Cotizacion.agregarItemDirecto(window._lastCfg, window._lastTotales, canvasDataUrl);
       }
+    } else {
+      App.toast('Ingrese medidas válidas antes de agregar', 'error');
+      return;
     }
     cfg = {};
     history = [];
@@ -546,12 +599,22 @@ const Wizard = (() => {
     App.toast('Iniciando nueva ventana para el presupuesto', '');
   }
 
-  function guardarPresupuesto() {
-    const items = Cotizacion.getItems();
-    if (items.length === 0 && window._lastCfg && window._lastTotales) {
-      const canvas = document.getElementById('resultado-canvas') || document.getElementById('preview-canvas');
-      const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
-      Cotizacion.agregarItemDirecto(window._lastCfg, window._lastTotales, canvasDataUrl);
+  async function guardarPresupuesto() {
+    const synced = await syncCurrentConfig();
+    if (synced && window._lastCfg && window._lastTotales) {
+      const items = Cotizacion.getItems();
+      const yaAgregado = items.some(item => 
+        item.cfg.anchoMm === window._lastCfg.anchoMm &&
+        item.cfg.altoMm === window._lastCfg.altoMm &&
+        item.cfg.tipo === window._lastCfg.tipo &&
+        item.cfg.subtipo === window._lastCfg.subtipo &&
+        item.cfg.cant === window._lastCfg.cant
+      );
+      if (!yaAgregado) {
+        const canvas = document.getElementById('preview-canvas') || document.getElementById('resultado-canvas');
+        const canvasDataUrl = canvas ? canvas.toDataURL('image/png') : null;
+        Cotizacion.agregarItemDirecto(window._lastCfg, window._lastTotales, canvasDataUrl);
+      }
     }
     
     if (Cotizacion.getItems().length === 0) {
@@ -574,7 +637,8 @@ const Wizard = (() => {
     }
   }
 
-  function eliminarVentana() {
+  async function eliminarVentana() {
+    await syncCurrentConfig();
     if (!window._lastCfg) {
       App.toast('No hay ninguna ventana seleccionada', 'error');
       return;
@@ -592,7 +656,6 @@ const Wizard = (() => {
     } else {
       App.toast('Esta ventana no estaba agregada al presupuesto', 'info');
     }
-    nuevaMedida();
   }
 
   return { 

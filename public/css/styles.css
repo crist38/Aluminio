@@ -1816,12 +1816,12 @@ body.light-theme .toast {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem;
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   box-shadow: var(--shadow);
   flex-wrap: wrap;
 }
@@ -1837,16 +1837,18 @@ body.light-theme .cotizacion-manager-card {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   font-size: 0.9rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: var(--transition);
   border: none;
+  text-align: center;
 }
 
 .cotizacion-manager-card .btn-mgr-add {
+  flex: 1 1 100%;
   background: #2563eb;
   color: #ffffff;
 }
@@ -1856,6 +1858,7 @@ body.light-theme .cotizacion-manager-card {
 }
 
 .cotizacion-manager-card .btn-mgr-save {
+  flex: 1 1 calc(50% - 0.4rem);
   background: #16a34a;
   color: #ffffff;
 }
@@ -1865,6 +1868,7 @@ body.light-theme .cotizacion-manager-card {
 }
 
 .cotizacion-manager-card .btn-mgr-duplicate {
+  flex: 1 1 auto;
   background: rgba(241, 245, 249, 0.1);
   color: var(--text-primary);
   border: 1px solid var(--border);
@@ -1884,6 +1888,7 @@ body.light-theme .cotizacion-manager-card .btn-mgr-duplicate:hover {
 }
 
 .cotizacion-manager-card .btn-mgr-delete {
+  flex: 1 1 calc(50% - 0.4rem);
   background: rgba(244, 63, 94, 0.1);
   color: #f43f5e;
   border: 1px solid rgba(244, 63, 94, 0.3);
