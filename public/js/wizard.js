@@ -289,6 +289,19 @@ const Wizard = (() => {
     document.querySelectorAll('input[name="color"]').forEach(radio => {
       radio.onchange = () => CanvasDraw.drawPreview(cfg);
     });
+    
+    // Conectar opciones dinámicas para redibujar en tiempo real al cambiar valores
+    form.oninput = () => {
+      _readOpciones();
+      CanvasDraw.drawPreview(cfg);
+    };
+    form.onchange = () => {
+      _readOpciones();
+      CanvasDraw.drawPreview(cfg);
+    };
+
+    // Leer opciones iniciales para sincronizar la vista previa desde el inicio
+    _readOpciones();
     CanvasDraw.drawPreview(cfg);
 
     history.push('step-medidas');
