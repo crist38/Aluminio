@@ -96,6 +96,17 @@ const Cotizacion = (() => {
 
     items.push(item);
     renderizarItems();
+
+    const panel = document.getElementById('panel-cotizacion');
+    if (panel) {
+      panel.style.display = 'block';
+      panel.classList.remove('collapsed');
+    }
+    const chevron = document.getElementById('cot-panel-chevron');
+    if (chevron) {
+      chevron.textContent = '🔽';
+    }
+
     document.getElementById('cotizacion-count').textContent = items.length;
     if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
     App.toast(`✅ "${item.descripcion}" agregado a la cotización`, 'success');
@@ -139,6 +150,17 @@ const Cotizacion = (() => {
     document.getElementById('cot-desc-extra').value = '';
     App.toast(`✅ "${item.descripcion}" agregado a la cotización`, 'success');
     cerrarModal();
+
+    const panel = document.getElementById('panel-cotizacion');
+    if (panel) {
+      panel.style.display = 'block';
+      panel.classList.remove('collapsed');
+    }
+    const chevron = document.getElementById('cot-panel-chevron');
+    if (chevron) {
+      chevron.textContent = '🔽';
+    }
+
     document.getElementById('cotizacion-count').textContent = items.length;
     if (typeof Wizard !== 'undefined') Wizard.actualizarBadgePaso3(items.length);
   }
@@ -494,6 +516,16 @@ const Cotizacion = (() => {
     abrirModal({ cfg, totales, canvasDataUrl });
   }
 
+  function togglePanel() {
+    const panel = document.getElementById('panel-cotizacion');
+    if (!panel) return;
+    panel.classList.toggle('collapsed');
+    const chevron = document.getElementById('cot-panel-chevron');
+    if (chevron) {
+      chevron.textContent = panel.classList.contains('collapsed') ? '🔼' : '🔽';
+    }
+  }
+
   return {
     abrirModal,
     abrirModalPresupuesto,
@@ -505,6 +537,7 @@ const Cotizacion = (() => {
     solicitarAgregar,
     imprimir,
     limpiar,
+    togglePanel,
     getItems: () => items,
   };
 })();

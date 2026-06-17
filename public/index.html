@@ -362,10 +362,11 @@
   <!-- ====== PANEL FLOTANTE COTIZACIÓN ====== -->
   <div id="panel-cotizacion" class="cot-panel" style="display:none">
     <div class="cot-panel-header">
-      <div class="cot-panel-title">
+      <div class="cot-panel-title" onclick="Cotizacion.togglePanel()" style="cursor:pointer; user-select:none;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
         Cotización
         <span class="cot-badge" id="cotizacion-count">0</span>
+        <span id="cot-panel-chevron" style="margin-left:0.5rem; transition: transform 0.2s;">🔽</span>
       </div>
       <div style="display:flex;gap:0.5rem">
         <button class="cot-panel-btn-limpiar" onclick="Cotizacion.limpiar()" title="Limpiar cotización">🗑️ Limpiar</button>

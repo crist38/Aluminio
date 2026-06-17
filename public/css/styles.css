@@ -1359,7 +1359,27 @@ body.light-theme .modal-footer {
 
 /* ── FLOATING QUOTATION PANEL (BOTTOM DRAWER) ── */
 .cot-panel {
-  display: none !important;
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+  z-index: 400;
+  width: calc(100% - 3rem);
+  max-width: 1340px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(20, 184, 166, 0.25);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), var(--shadow-glow);
+  max-height: 300px;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUpFloating 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.cot-panel.collapsed {
+  max-height: 52px;
 }
 
 body.light-theme .cot-panel {
@@ -1605,8 +1625,11 @@ body.light-theme .cot-tot-row {
 }
 
 /* Espacio inferior en el footer para evitar solapamientos con el panel flotante */
-body:has(.cot-panel:not([style*="display:none"])) .app-footer {
+body:has(.cot-panel:not([style*="display:none"]):not(.collapsed)) .app-footer {
   margin-bottom: 315px;
+}
+body:has(.cot-panel.collapsed:not([style*="display:none"])) .app-footer {
+  margin-bottom: 80px;
 }
 
 /* ── APP FOOTER ── */
